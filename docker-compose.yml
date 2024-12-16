@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+
+  soap-service:
+    build: ./soap-service
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+
+  api-rest:
+    build: ./api-rest
+    ports:
+      - "5003:5001"
+    depends_on:
+      - postgres
+
+  inventory-service:
+    build: ./inventory-service
+    ports:
+      - "5002:5002"
+    depends_on:
+      - postgres
