@@ -110,7 +110,39 @@ def delete_reservation(reservation_id):
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)
 
+@app.route('/reservations', methods=['GET'])
+def get_reservations():
+    try:
+        print("Conectando a la base de datos para obtener todas las reservas...")
+        conn = psycopg2.connect(**DB_CONFIG)
+        print("Conexión exitosa")
+        
+        cursor = conn.cursor()
+        query = "SELECT reservation_id, room_number, customer_name, start_date, end_date, status FROM reservations;"
+        cursor.execute(query)
+        rows = cursor.fetchall()
 
+        reservations = []
+        for row in rows:
+            reservation = {
+                "reservation_id": row[0],
+                "room_number": row[1],
+                "customer_name": row[2],
+                "start_date": str(row[3]),
+                "end_date": str(row[4]),
+                "status": row[5]
+            }
+            reservations.append(reservation)
+
+        return jsonify(reservations), 200
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
 
 def update_availability(room_number, start_date, end_date):
     # Hacer la solicitud POST al servicio SOAP
